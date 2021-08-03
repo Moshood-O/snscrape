@@ -167,6 +167,7 @@ class TwitterAPIScraper(snscrape.base.Scraper):
 
 	def _ensure_guest_token(self, url = None):
 		token = str(uuid.uuid4().hex)
+		print(f"Generated token is {token}")
 		if self._guestToken is not None:
 			return
 		logger.info('Retrieving guest token')
