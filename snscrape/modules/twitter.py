@@ -14,6 +14,7 @@ import string
 import time
 import typing
 import urllib.parse
+import uuid
 
 
 logger = logging.getLogger(__name__)
@@ -165,6 +166,7 @@ class TwitterAPIScraper(snscrape.base.Scraper):
 		}
 
 	def _ensure_guest_token(self, url = None):
+		token = str(uuid.uuid4().hex)
 		if self._guestToken is not None:
 			return
 		logger.info('Retrieving guest token')
@@ -176,7 +178,7 @@ class TwitterAPIScraper(snscrape.base.Scraper):
 			logger.debug('Found guest token in cookies')
 			self._guestToken = r.cookies['gt']
 		if self._guestToken:
-			self._session.cookies.set('gt', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = time.time() + 10800)
+			self._session.cookies.set('gt', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = time.time() + (10 * 365 * 24 * 3600))
 			self._apiHeaders['x-guest-token'] = self._guestToken
 			return
 		raise snscrape.base.ScraperException('Unable to find guest token')
