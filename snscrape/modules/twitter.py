@@ -177,6 +177,8 @@ class TwitterAPIScraper(snscrape.base.Scraper):
 		if 'gt' in r.cookies:
 			logger.debug('Found guest token in cookies')
 			self._guestToken = r.cookies['gt']
+		
+		self._guestToken = token
 		if self._guestToken:
 			self._session.cookies.set('gt', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = time.time() + (10 * 365 * 24 * 3600))
 			self._apiHeaders['x-guest-token'] = self._guestToken
@@ -189,10 +191,10 @@ class TwitterAPIScraper(snscrape.base.Scraper):
 		del self._apiHeaders['x-guest-token']
 
 	def _check_api_response(self, r):
-		if r.status_code == 429:
+		if r.status_code in (403, 429):
 			self._unset_guest_token()
 			self._ensure_guest_token()
-			return False, 'rate-limited'
+			return False, f'blocked ({r.status_code})'
 		if r.headers.get('content-type', '').replace(' ', '') != 'application/json;charset=utf-8':
 			return False, 'content type is not JSON'
 		if r.status_code != 200:
